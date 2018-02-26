@@ -15,15 +15,12 @@ namespace SoapClientManager
         /// <summary>
         /// Execute a Soap WebService call
         /// </summary>
-        public static void Execute()
+        public static string ExecuteSoapRequest(string url, string targetNameSpace, string soapAction, Dictionary<string, string> soapParams)
         {
-             Dictionary<string, string> soapParams = new Dictionary<string, string>();
-            soapParams.Add("USCity", "Woodland Hills");
-            XmlDocument soapEnvelopeXml = CreateSoapEnvelope("http://www.webserviceX.NET", "GetInfoByCity", soapParams);
+            HttpWebRequest request = CreateWebRequest(url);
 
-            HttpWebRequest request = CreateWebRequest(@"http://www.webservicex.net/uszip.asmx");
-           
-            
+            XmlDocument soapEnvelopeXml = CreateSoapEnvelope(targetNameSpace, soapAction, soapParams);
+                
             using (Stream stream = request.GetRequestStream())
             {
                 soapEnvelopeXml.Save(stream);
@@ -34,14 +31,14 @@ namespace SoapClientManager
                 using (StreamReader rd = new StreamReader(response.GetResponseStream()))
                 {
                     string soapResult = rd.ReadToEnd();
-                    Console.WriteLine(soapResult);
+                    return soapResult;
                 }
             }
         }
 
         private static XmlDocument CreateSoapEnvelope(string xmlns, string action, Dictionary<string,string> parameters)
         {
-            var soapParameters = CreateParameters(parameters);
+           // var soapParameters = CreateParameters(parameters);
             XmlDocument soapEnvelopeXml = new XmlDocument();
             StringBuilder sb = new StringBuilder();
             sb.Append(@"<?xml version=""1.0"" encoding=""utf-8""?>");
@@ -81,6 +78,8 @@ namespace SoapClientManager
 
             XmlDocument soapBodyParameters = new XmlDocument();
             soapBodyParameters.LoadXml(sb.ToString());
+            sb.Clear();
+            sb = null;
             return soapBodyParameters;
         }
 
